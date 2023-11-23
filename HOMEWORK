@@ -1,0 +1,198 @@
+# 1. OK > Додамо поле для дня народження Birthday. Це поле не обов'язкове, але може бути тільки одне.
+# 2. OK Додамо функціонал роботи з Birthday у клас Record, а саме функцію days_to_birthday, яка повертає кількість днів до наступного дня народження.
+# 3. OK Додамо функціонал перевірки на правильність наведених значень для полів Phone, Birthday.
+# 4. OK Додамо пагінацію (посторінковий висновок) для AddressBook для ситуацій, коли книга дуже велика і треба показати вміст частинами, а не все одразу.
+# 5. OK Реалізуємо це через створення ітератора за записами.
+
+
+# Критерії прийому:
+# 1. OK > AddressBook реалізує метод iterator, який повертає генератор за записами AddressBook і за одну ітерацію повертає уявлення для N записів.
+# 2. OK > Клас Record приймає ще один додатковий (опціональний) аргумент класу Birthday
+# 3. OK > Клас Record реалізує метод days_to_birthday, який повертає кількість днів до наступного дня народження контакту, якщо день народження заданий.
+# 4. OK > setter та getter логіку для атрибутів value спадкоємців Field.
+# 5. OK > Перевірку на коректність веденого номера телефону setter для value класу Phone.
+# 6. OK > Перевірку на коректність веденого дня народження setter для value класу Birthday.
+
+
+from collections import UserDict
+from colorama import init
+from datetime import datetime,date
+init()
+
+
+
+
+    
+
+
+class Field:
+    def __init__(self, value = None):
+        self._value = value
+    @property
+    def value(self):
+        return self._value
+   
+    @value.setter
+    def value(self,value):
+        self._value = value
+
+    def __str__(self):
+        return str(self.value)
+
+class Name(Field):
+    def __init__(self, value):
+        super().__init__(value)
+    
+    def __str__(self):
+        return super().__str__()
+    
+class Phone(Field):
+    def __init__(self, value):
+        super().__init__(value)
+        
+        if len(str(value)) == 10 and str(value).isdigit():
+            self._value = value
+            
+        else:
+            raise ValueError('Invalid phone number')
+        
+    
+    @property
+    def value(self):
+        return super().value
+    @value.setter
+    def value(self,value):
+        if len(str(value)) == 10 and str(value).isdigit():
+            self._value = value
+        else:
+            raise ValueError('Invalid phone number')
+    
+    def __str__(self):
+        return super().__str__()
+    
+
+class Birthday(Field):
+    
+    def __init__(self, value):
+        super().__init__(value)
+        if type(value) == date:
+            self._value = value
+        else:
+            raise ValueError('Invalid Birthday date')
+    @property
+    def value(self):
+        return super().value
+    
+    @value.setter
+    def value(self,value):
+        if type(value) == date:
+            self._value = value
+        else:
+            raise ValueError('Invalid Birthday date')
+        
+    def __str__(self):
+        return super().__str__()
+        
+
+
+class Record:
+    def __init__(self, name,):
+        self.name = Name(name)
+        self.phones = []
+        self.birthday = None
+        print(f'Create New Contact ===> Name: {self.name}')
+    
+    def add_birthday(self,birth_day):
+        self.birthday = Birthday(birth_day).value
+    
+    def add_phone(self,new_phone):
+        number = Phone(new_phone)
+               
+        
+        self.phones.append(number)
+        print(repr(self.phones))
+       
+        print(f'Add new phone number: {new_phone}')
+    
+    
+    def remove_phone(self,phone):
+        for item in self.phones:
+            if phone == item.value:
+                print(f'Remove phone Number: {phone}')
+                self.phones.remove(item)
+                return
+        
+    def edit_phone(self,old_phone,new_phone):
+        for item in self.phones:
+            print(type)
+            print(f'item => {item._value: new_phone => {new_phone}: old_phone => {old_phone}}')
+            if item.value() == old_phone:
+                item._value = new_phone
+                print(f'Edit Contact ===> old Contact: {old_phone} ===> new Contact{new_phone}')
+                return
+        raise ValueError()
+    
+    def find_phone(self,phone):
+        for item in self.phones:
+            if item._value == phone:
+                print(f'Find {phone}')
+                return item
+        return None
+
+    def days_to_birthday(self):
+        if self.birthday != None:
+            birthday_in_year = datetime(year=datetime.now().year,month=self.birthday.month,day=self.birthday.day)
+            if datetime.now() <= birthday_in_year:
+                return birthday_in_year.date() - datetime.now().date()
+            else:
+                birthday_in_year = datetime(year=birthday_in_year.year + 1,month=birthday_in_year.month,day=birthday_in_year.day)
+                return birthday_in_year.date() - datetime.now().date()
+    
+        
+    def __str__(self):
+        phone_numbers = ', '.join([str(phone.value) for phone in self.phones])
+        return f"Name: {self.name.value}, Phones: {phone_numbers}"
+
+
+
+class AddressBook(UserDict):
+    def add_record(self, record: Record):
+        print(f'Add record {record.name.value}')
+        self.data[record.name.value] = record
+
+    def find(self, name):
+        print(f'Find Name => {name}')
+        print(self.data.get(name))
+        return self.data.get(name)
+
+    def delete(self, name):
+        if name in self.data:
+            print(f'Delete {self.data[name]}')
+            del self.data[name]
+           
+    def __str__(self):
+       return ''.join(f'{value}\n' for key,value in self.data.items())     
+    
+    def __iter__(self):
+        return self
+    
+    
+    def iterator(self, item_number):
+        counter = 0
+        result = ''
+        for item, record in self.data.items():
+            result += f'{record}\n'
+            counter += 1
+            if counter >= item_number:
+                yield result
+                counter = 0
+                result = ''
+               
+    
+
+
+
+
+
+
+
